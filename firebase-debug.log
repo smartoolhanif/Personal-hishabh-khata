@@ -1,0 +1,68 @@
+[debug] [2026-09-10T19:04:11.823Z] ----------------------------------------------------------------------
+[debug] [2026-09-10T19:04:11.826Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy --only firestore:rules --project hisab-93d73
+[debug] [2026-09-10T19:04:11.827Z] CLI Version:   15.26.0
+[debug] [2026-09-10T19:04:11.827Z] Platform:      linux
+[debug] [2026-09-10T19:04:11.827Z] Node Version:  v22.23.2
+[debug] [2026-09-10T19:04:11.828Z] Detected Agent: unknown
+[debug] [2026-09-10T19:04:11.828Z] Time:          Thu Sep 10 2026 19:04:11 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-09-10T19:04:11.828Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-09-10T19:04:14.502Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-09-10T19:04:14.502Z] > authorizing via signed-in user (mdhanife9@gmail.com)
+[debug] [2026-09-10T19:04:14.502Z] [iam] checking project hisab-93d73 for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-09-10T19:04:14.530Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:14.530Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:14.532Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/hisab-93d73:testIamPermissions [none]
+[debug] [2026-09-10T19:04:14.532Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/hisab-93d73:testIamPermissions  x-goog-user-project=hisab-93d73
+[debug] [2026-09-10T19:04:14.532Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/hisab-93d73:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-09-10T19:04:15.388Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/hisab-93d73:testIamPermissions 200
+[debug] [2026-09-10T19:04:15.388Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/hisab-93d73:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[info] 
+[info] === Deploying to 'hisab-93d73'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-09-10T19:04:15.392Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:15.392Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:15.392Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/hisab-93d73/services/firestore.googleapis.com [none]
+[debug] [2026-09-10T19:04:15.392Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/hisab-93d73/services/firestore.googleapis.com  x-goog-user-project=hisab-93d73
+[debug] [2026-09-10T19:04:16.650Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/hisab-93d73/services/firestore.googleapis.com 200
+[debug] [2026-09-10T19:04:16.650Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/hisab-93d73/services/firestore.googleapis.com [omitted]
+[info] ✔  firestore: required API firestore.googleapis.com is enabled 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-09-10T19:04:16.656Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:16.656Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:16.656Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/hisab-93d73/databases/(default) [none]
+[debug] [2026-09-10T19:04:17.745Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/hisab-93d73/databases/(default) 200
+[debug] [2026-09-10T19:04:17.745Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/hisab-93d73/databases/(default) {"name":"projects/hisab-93d73/databases/(default)","uid":"bee13c44-f4cd-42df-bc4f-69d320b2b9ce","createTime":"2026-06-11T22:12:17.461912Z","updateTime":"2026-06-11T22:12:17.461912Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-09-10T18:04:17.655885Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","enhancedTextSearchQueryMode":"ENHANCED_QUERY_MODE_ENABLED","etag":"IPDczZPa5JYDMKy4gcyagJUD"}
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2026-09-10T19:04:17.747Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:17.747Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:17.747Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73:test [none]
+[debug] [2026-09-10T19:04:17.747Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73:test [omitted]
+[debug] [2026-09-10T19:04:18.815Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73:test 200
+[debug] [2026-09-10T19:04:18.816Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73:test {}
+[info] ✔  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2026-09-10T19:04:18.818Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:18.818Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:18.818Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/hisab-93d73/releases pageSize=10&pageToken=
+[debug] [2026-09-10T19:04:19.881Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/hisab-93d73/releases 200
+[debug] [2026-09-10T19:04:19.881Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/hisab-93d73/releases {"releases":[{"name":"projects/hisab-93d73/releases/cloud.firestore","rulesetName":"projects/hisab-93d73/rulesets/da6333f3-3440-4938-b3c7-6b9a97ea9a27","createTime":"2026-06-11T22:12:23.471771Z","updateTime":"2026-06-11T22:12:23.471771Z"}]}
+[debug] [2026-09-10T19:04:19.882Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:19.882Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:19.882Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/hisab-93d73/rulesets/da6333f3-3440-4938-b3c7-6b9a97ea9a27 [none]
+[debug] [2026-09-10T19:04:20.926Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/hisab-93d73/rulesets/da6333f3-3440-4938-b3c7-6b9a97ea9a27 200
+[debug] [2026-09-10T19:04:20.926Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/hisab-93d73/rulesets/da6333f3-3440-4938-b3c7-6b9a97ea9a27 [omitted]
+[info] i  firestore: uploading rules firestore.rules... 
+[debug] [2026-09-10T19:04:20.928Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:20.928Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:20.928Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73/rulesets [none]
+[debug] [2026-09-10T19:04:20.928Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73/rulesets [omitted]
+[debug] [2026-09-10T19:04:21.389Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73/rulesets 200
+[debug] [2026-09-10T19:04:21.390Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/hisab-93d73/rulesets {"name":"projects/hisab-93d73/rulesets/53692757-1e1a-4e95-af55-ac475753864f","source":{"files":[{"content":"rules_version = '2';\n\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    // User profile isolation\n    match /users/{userId} {\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n\n      // Transactions subcollection isolation\n      match /transactions/{transactionId} {\n        allow read, write: if request.auth != null && request.auth.uid == userId;\n      }\n\n      // Categories subcollection isolation\n      match /categories/{categoryId} {\n        allow read, write: if request.auth != null && request.auth.uid == userId;\n      }\n\n      // Settings subcollection isolation\n      match /settings/{settingId} {\n        allow read, write: if request.auth != null && request.auth.uid == userId;\n      }\n    }\n  }\n}\n","name":"firestore.rules"}]},"createTime":"2026-09-10T19:04:21.281823Z","metadata":{"services":["cloud.firestore"]}}
+[debug] [2026-09-10T19:04:21.390Z] [rules] created ruleset projects/hisab-93d73/rulesets/53692757-1e1a-4e95-af55-ac475753864f
+[debug] [2026-09-10T19:04:21.390Z] [rules] releasing cloud.firestore with ruleset projects/hisab-93d73/rulesets/53692757-1e1a-4e95-af55-ac475753864f
+[debug] [2026-09-10T19:04:21.391Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:21.391Z] Checked if tokens are valid: true, expires at: 1789070588734
+[debug] [2026-09-10T19:04:21.391Z] >>> [apiv2][query] PATCH https://firebaserules.googleapis.com/v1/projects/hisab-93d73/releases/cloud.firestore [none]
+[debug] [2026-09-10T19:04:21.391Z] >>> [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/hisab-93d73/releases/cloud.firestore {"release":{"name":"projects/hisab-93d73/releases/cloud.firestore","rulesetName":"projects/hisab-93d73/rulesets/53692757-1e1a-4e95-af55-ac475753864f"}}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">হিসাব খাতা</string>
+    <string name="app_name_full">হানিফ হিসাব খাতা</string>
+    
+    <!-- Biometric & Security Strings (Bangla) -->
+    <string name="security_settings">নিরাপত্তা</string>
+    <string name="biometric_unlock">বায়োমেট্রিক আনলক</string>
+    <string name="biometric_unlock_desc">ফিঙ্গারপ্রিন্ট বা ফেস আনলক ব্যবহার করে হিসাব খাতা খুলুন।</string>
+    <string name="biometric_prompt_title">হিসাব খাতা আনলক করুন</string>
+    <string name="biometric_prompt_subtitle">আনলক করতে বায়োমেট্রিক ব্যবহার করুন</string>
+    <string name="biometric_prompt_cancel">বাতিল</string>
+    <string name="biometric_setup_title">আপনার হিসাব খাতা সুরক্ষিত করুন</string>
+    <string name="biometric_setup_desc">ফিঙ্গারপ্রিন্ট বা ফেস আনলক ব্যবহার করে দ্রুত ও নিরাপদে অ্যাপ খুলুন।</string>
+    <string name="btn_enable_biometric">বায়োমেট্রিক চালু করুন</string>
+    <string name="btn_not_now">এখন নয়</string>
+    <string name="biometric_enabled_toast">বায়োমেট্রিক আনলক সক্রিয় করা হয়েছে</string>
+    <string name="biometric_disabled_toast">বায়োমেট্রিক আনলক নিষ্ক্রিয় করা হয়েছে</string>
+    <string name="unlock_your_account">আপনার অ্যাকাউন্ট আনলক করুন</string>
+    <string name="unlock_to_continue">চালিয়ে যেতে আনলক করুন</string>
+    <string name="btn_unlock">আনলক করুন</string>
+    <string name="btn_use_google_account">গুগল অ্যাকাউন্ট ব্যবহার করুন</string>
+    <string name="biometric_verification_failed">বায়োমেট্রিক যাচাই ব্যর্থ হয়েছে। আবার চেষ্টা করুন।</string>
+    <string name="biometric_not_available">এই ডিভাইসে উপলব্ধ নয়</string>
+    <string name="biometric_not_enrolled">ডিভাইসে কোনো বায়োমেট্রিক যোগ করা নেই</string>
+    <string name="status_on">চালু</string>
+    <string name="status_off">বন্ধ</string>
+    <string name="dialog_disable_biometric_title">বায়োমেট্রিক আনলক বন্ধ করবেন?</string>
+    <string name="dialog_disable_biometric_desc">আপনি কি নিশ্চিতভাবে এই অ্যাকাউন্টের জন্য বায়োমেট্রিক আনলক বন্ধ করতে চান?</string>
+    <string name="btn_disable">বন্ধ করুন</string>
+    <string name="btn_cancel">বাতিল</string>
+</resources>

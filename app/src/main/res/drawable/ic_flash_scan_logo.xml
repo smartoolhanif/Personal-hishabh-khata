@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Rounded Background Card -->
+    <path
+        android:pathData="M 20,8 L 100,8 A 20,20 0 0 1 120,28 L 120,92 A 20,20 0 0 1 100,112 L 20,112 A 20,20 0 0 1 0,92 L 0,28 A 20,20 0 0 1 20,8 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="8"
+                android:endX="120"
+                android:endY="112"
+                android:type="linear">
+                <item android:color="#FF0D2244" android:offset="0.0" />
+                <item android:color="#FF071326" android:offset="0.6" />
+                <item android:color="#FF030914" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Subtle Radial Glow -->
+    <path
+        android:pathData="M60,20 A40,40 0 1 0 60,100 A40,40 0 1 0 60,20 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="60"
+                android:centerY="60"
+                android:gradientRadius="40"
+                android:type="radial">
+                <item android:color="#2E00E5FF" android:offset="0.0" />
+                <item android:color="#0000E5FF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Document Sheet Silhouette -->
+    <path
+        android:pathData="M 46,39 C 44.5,39 43.5,40 43.5,41.5 L 43.5,80.5 C 43.5,82 44.5,83 46,83 L 74,83 C 75.5,83 76.5,82 76.5,80.5 L 76.5,50 L 65.5,39 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="43"
+                android:startY="39"
+                android:endX="77"
+                android:endY="83"
+                android:type="linear">
+                <item android:color="#FFFFFFFF" android:offset="0.0" />
+                <item android:color="#FFE3F2FD" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Folded Corner Flap -->
+    <path
+        android:pathData="M 65.5,39 L 65.5,48.5 C 65.5,49.5 66.5,50 67.5,50 L 76.5,50 Z"
+        android:fillColor="#FFB0BEC5" />
+    <path
+        android:pathData="M 65.5,39 L 76.5,50 L 65.5,50 Z"
+        android:fillColor="#FFCFD8DC" />
+
+    <!-- Document Text Lines -->
+    <path
+        android:pathData="M 50,52 L 62,52 M 50,59 L 70,59 M 50,66 L 70,66 M 50,73 L 65,73"
+        android:strokeWidth="2"
+        android:strokeColor="#FF90A4AE"
+        android:strokeLineCap="round" />
+
+    <!-- 4 Viewfinder Scanner Corners (Electric Cyan) -->
+    <!-- Top-Left -->
+    <path
+        android:pathData="M 34,48 L 34,38 C 34,35 36.5,33 39.5,33 L 49.5,33"
+        android:strokeWidth="4"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Top-Right -->
+    <path
+        android:pathData="M 70.5,33 L 80.5,33 C 83.5,33 86,35 86,38 L 86,48"
+        android:strokeWidth="4"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Bottom-Left -->
+    <path
+        android:pathData="M 34,74 L 34,84 C 34,87 36.5,89 39.5,89 L 49.5,89"
+        android:strokeWidth="4"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Bottom-Right -->
+    <path
+        android:pathData="M 70.5,89 L 80.5,89 C 83.5,89 86,87 86,84 L 86,74"
+        android:strokeWidth="4"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Laser Scanning Beam Glow Strip -->
+    <path
+        android:pathData="M 33,57 L 87,57 L 87,63 L 33,63 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="33"
+                android:startY="60"
+                android:endX="87"
+                android:endY="60"
+                android:type="linear">
+                <item android:color="#0000E5FF" android:offset="0.0" />
+                <item android:color="#8000E5FF" android:offset="0.15" />
+                <item android:color="#E000E5FF" android:offset="0.5" />
+                <item android:color="#8000E5FF" android:offset="0.85" />
+                <item android:color="#0000E5FF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Brilliant Laser Beam Core Line -->
+    <path
+        android:pathData="M 31,60 L 89,60"
+        android:strokeWidth="2.8"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- Flash Sparkle Star Flare (Right Edge of Scan Beam) -->
+    <path
+        android:pathData="M 80,60 C 80,56.5 82.5,54 86,54 C 82.5,54 80,51.5 80,48 C 80,51.5 77.5,54 74,54 C 77.5,54 80,56.5 80,60 Z"
+        android:fillColor="#FFFFFFFF" />
+    <path
+        android:pathData="M 80,60 C 80,57.5 81.8,55.5 84,55.5 C 81.8,55.5 80,53.5 80,51 C 80,53.5 78.2,55.5 76,55.5 C 78.2,55.5 80,57.5 80,60 Z"
+        android:fillColor="#FF00E5FF" />
+
+</vector>

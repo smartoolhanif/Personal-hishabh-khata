@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Document Sheet Silhouette with Folded Corner -->
+    <path
+        android:pathData="M 43,38 C 41.5,38 40.5,39 40.5,40.5 L 40.5,67.5 C 40.5,69 41.5,70 43,70 L 65,70 C 66.5,70 67.5,69 67.5,67.5 L 67.5,46 L 59.5,38 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="40"
+                android:startY="38"
+                android:endX="68"
+                android:endY="70"
+                android:type="linear">
+                <item android:color="#FFFFFFFF" android:offset="0.0" />
+                <item android:color="#FFE8F4FD" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Document Folded Corner Shadow & Flap -->
+    <path
+        android:pathData="M 59.5,38 L 59.5,44.5 C 59.5,45.5 60.5,46 61.5,46 L 67.5,46 Z"
+        android:fillColor="#FFB0BEC5" />
+    <path
+        android:pathData="M 59.5,38 L 67.5,46 L 59.5,46 Z"
+        android:fillColor="#FFCFD8DC" />
+
+    <!-- Document Content Preview Lines -->
+    <path
+        android:pathData="M 46,47 L 56,47 M 46,52 L 62,52 M 46,57 L 62,57 M 46,62 L 58,62"
+        android:strokeWidth="1.8"
+        android:strokeColor="#FF90A4AE"
+        android:strokeLineCap="round" />
+
+    <!-- Four Viewfinder Scanner Corners (Electric Cyan) -->
+    <!-- Top-Left Corner -->
+    <path
+        android:pathData="M 33,43 L 33,36 C 33,33.8 34.8,32 37,32 L 44,32"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Top-Right Corner -->
+    <path
+        android:pathData="M 64,32 L 71,32 C 73.2,32 75,33.8 75,36 L 75,43"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Bottom-Left Corner -->
+    <path
+        android:pathData="M 33,65 L 33,72 C 33,74.2 34.8,76 37,76 L 44,76"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Bottom-Right Corner -->
+    <path
+        android:pathData="M 64,76 L 71,76 C 73.2,76 75,74.2 75,72 L 75,65"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FF00E5FF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Laser Scanning Beam Glow Area -->
+    <path
+        android:pathData="M 34,51.5 L 74,51.5 L 74,56.5 L 34,56.5 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="34"
+                android:startY="54"
+                android:endX="74"
+                android:endY="54"
+                android:type="linear">
+                <item android:color="#0000E5FF" android:offset="0.0" />
+                <item android:color="#8000E5FF" android:offset="0.2" />
+                <item android:color="#D000E5FF" android:offset="0.5" />
+                <item android:color="#8000E5FF" android:offset="0.8" />
+                <item android:color="#0000E5FF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Sharp Laser Beam Line -->
+    <path
+        android:pathData="M 32,54 L 76,54"
+        android:strokeWidth="2.2"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- Flash Sparkle Star (Top Right of Beam) -->
+    <path
+        android:pathData="M 69,54 C 69,51 71,49 74,49 C 71,49 69,47 69,44 C 69,47 67,49 64,49 C 67,49 69,51 69,54 Z"
+        android:fillColor="#FFFFFFFF" />
+    <path
+        android:pathData="M 69,54 C 69,52 70.5,50.5 72.5,50.5 C 70.5,50.5 69,49 69,47 C 69,49 67.5,50.5 65.5,50.5 C 67.5,50.5 69,52 69,54 Z"
+        android:fillColor="#FF00E5FF" />
+
+</vector>

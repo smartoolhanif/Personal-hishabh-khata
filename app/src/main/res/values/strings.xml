@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Flash Scan</string>
+    <string name="app_name_full">Flash Scan</string>
+    
+    <!-- Biometric & Security Strings -->
+    <string name="security_settings">Security</string>
+    <string name="biometric_unlock">Biometric Unlock</string>
+    <string name="biometric_unlock_desc">Use fingerprint or face to unlock HANIF HISAB KHATA.</string>
+    <string name="biometric_prompt_title">Unlock Hanif Hisab Khata</string>
+    <string name="biometric_prompt_subtitle">Use your fingerprint or face to unlock</string>
+    <string name="biometric_prompt_cancel">Cancel</string>
+    <string name="biometric_setup_title">Protect your Hisab Khata</string>
+    <string name="biometric_setup_desc">Use fingerprint or face unlock to quickly and securely open your account.</string>
+    <string name="btn_enable_biometric">Enable Biometric</string>
+    <string name="btn_not_now">Not Now</string>
+    <string name="biometric_enabled_toast">Biometric unlock enabled</string>
+    <string name="biometric_disabled_toast">Biometric unlock disabled</string>
+    <string name="unlock_your_account">Unlock your account</string>
+    <string name="unlock_to_continue">Unlock to continue</string>
+    <string name="btn_unlock">Unlock</string>
+    <string name="btn_use_google_account">Use Google Account</string>
+    <string name="biometric_verification_failed">Biometric verification failed. Please try again.</string>
+    <string name="biometric_not_available">Not available on this device</string>
+    <string name="biometric_not_enrolled">No biometrics enrolled on device</string>
+    <string name="status_on">ON</string>
+    <string name="status_off">OFF</string>
+    <string name="dialog_disable_biometric_title">Disable Biometric Unlock?</string>
+    <string name="dialog_disable_biometric_desc">Are you sure you want to disable fingerprint or face unlock for this account?</string>
+    <string name="btn_disable">Disable</string>
+    <string name="btn_cancel">Cancel</string>
+</resources>
