@@ -111,6 +111,17 @@ class FirebaseTransactionRepository : TransactionRepository {
         }
     }
 
+    override suspend fun restoreTransaction(transaction: Transaction): Result<Unit> {
+        val collection = getTransactionsCollection() ?: return Result.failure(Exception("Not authenticated"))
+        return try {
+            val docId = if (transaction.id.isNotBlank()) transaction.id else collection.document().id
+            collection.document(docId).set(transaction.copy(id = docId)).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override fun getCategories(type: TransactionType?): Flow<List<Category>> {
         val collection = getCategoriesCollection() ?: return emptyFlow()
         val query = if (type != null) {
@@ -129,6 +140,26 @@ class FirebaseTransactionRepository : TransactionRepository {
             val docRef = collection.document()
             val newCategory = category.copy(id = docRef.id)
             docRef.set(newCategory).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateCategory(category: Category): Result<Unit> {
+        val collection = getCategoriesCollection() ?: return Result.failure(Exception("Not authenticated"))
+        return try {
+            collection.document(category.id).set(category).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteCategory(categoryId: String): Result<Unit> {
+        val collection = getCategoriesCollection() ?: return Result.failure(Exception("Not authenticated"))
+        return try {
+            collection.document(categoryId).delete().await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

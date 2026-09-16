@@ -2,6 +2,10 @@ package com.example.presentation.screens.add
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,25 +19,27 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.domain.model.Category
 import com.example.domain.model.TransactionType
+import com.example.domain.model.Wallet
 import com.example.ui.theme.ExpenseColor
 import com.example.ui.theme.IncomeColor
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -53,15 +59,46 @@ fun AddTransactionScreen(
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
+    var selectedWallet by remember { mutableStateOf<Wallet?>(null) }
     var selectedDate by remember { mutableStateOf(Date()) }
+    var receiptUriString by remember { mutableStateOf<String?>(null) }
+    var isRecurring by remember { mutableStateOf(false) }
+    var recurringFrequency by remember { mutableStateOf("মাসিক (Monthly)") }
+
+    var showAddCategoryDialog by remember { mutableStateOf(false) }
+    var categoryToEdit by remember { mutableStateOf<Category?>(null) }
+    var newCategoryName by remember { mutableStateOf("") }
+    var editCategoryName by remember { mutableStateOf("") }
 
     val type by viewModel.type.collectAsState()
     val categories by viewModel.categories.collectAsState()
+    val wallets by viewModel.wallets.collectAsState()
     val isSaving by viewModel.isSaving.collectAsState()
     val saveSuccess by viewModel.saveSuccess.collectAsState()
     val error by viewModel.error.collectAsState()
     val loadedTransaction by viewModel.loadedTransaction.collectAsState()
     val isLoadingTransaction by viewModel.isLoadingTransaction.collectAsState()
+
+    // Photo Picker launcher for Receipt
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                // Copy image to app private storage to persist access
+                val dir = File(context.filesDir, "receipts").apply { mkdirs() }
+                val destFile = File(dir, "receipt_${System.currentTimeMillis()}.jpg")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(destFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                receiptUriString = destFile.absolutePath
+            } catch (e: Exception) {
+                receiptUriString = uri.toString()
+            }
+        }
+    }
 
     // Trigger loading if in edit mode
     LaunchedEffect(transactionIdToEdit) {
@@ -71,12 +108,15 @@ fun AddTransactionScreen(
     }
 
     // Populate fields when transaction is loaded
-    LaunchedEffect(loadedTransaction, categories) {
+    LaunchedEffect(loadedTransaction, categories, wallets) {
         val tx = loadedTransaction
         if (tx != null) {
             title = tx.title
             amount = if (tx.amount % 1.0 == 0.0) tx.amount.toLong().toString() else tx.amount.toString()
             note = tx.note
+            receiptUriString = tx.receiptImageUri
+            isRecurring = tx.isRecurring
+            recurringFrequency = tx.recurringFrequency.ifBlank { "মাসিক (Monthly)" }
             if (tx.timestamp > 0) {
                 selectedDate = Date(tx.timestamp)
             }
@@ -85,6 +125,12 @@ fun AddTransactionScreen(
                     ?: categories.firstOrNull { it.name.equals(tx.categoryName, ignoreCase = true) }
                     ?: Category(id = tx.categoryId, name = tx.categoryName, type = tx.type, iconName = "")
             }
+            if (selectedWallet == null && wallets.isNotEmpty()) {
+                selectedWallet = wallets.firstOrNull { it.id == tx.walletId }
+                    ?: wallets.firstOrNull { it.name.equals(tx.walletName, ignoreCase = true) }
+            }
+        } else if (selectedWallet == null && wallets.isNotEmpty()) {
+            selectedWallet = wallets.first()
         }
     }
 
@@ -283,7 +329,47 @@ fun AddTransactionScreen(
                     }
                 }
 
-                // 3. Category Selector Chips
+                // 3. Wallet / Account Selection
+                if (wallets.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "অ্যাকাউন্ট / ওয়ালেট (Wallet)",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(wallets, key = { it.id }) { wallet ->
+                                    val isSelected = selectedWallet?.id == wallet.id
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { selectedWallet = wallet },
+                                        label = { Text("${wallet.name} (৳${wallet.currentBalance.toInt()})") },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Filled.AccountBalanceWallet,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        },
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 4. Category Selector Chips & Management
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -291,17 +377,58 @@ fun AddTransactionScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "ক্যাটেগরি নির্বাচন করুন (Category)",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "ক্যাটেগরি নির্বাচন করুন (Category)",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            FilledTonalButton(
+                                onClick = {
+                                    newCategoryName = ""
+                                    showAddCategoryDialog = true
+                                },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.height(32.dp)
+                            ) {
+                                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("নতুন ক্যাটেগরি", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
                         Spacer(modifier = Modifier.height(10.dp))
 
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(vertical = 4.dp)
+                            contentPadding = PaddingValues(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // Quick Add Chip
+                            item {
+                                AssistChip(
+                                    onClick = {
+                                        newCategoryName = ""
+                                        showAddCategoryDialog = true
+                                    },
+                                    label = { Text("+ নতুন", fontWeight = FontWeight.Bold, fontSize = 12.sp) },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Filled.AddCircleOutline,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                            }
+
                             items(filteredCategories, key = { it.id }) { category ->
                                 val isSelected = selectedCategory?.id == category.id
                                 FilterChip(
@@ -315,6 +442,22 @@ fun AddTransactionScreen(
                                             modifier = Modifier.size(16.dp)
                                         )
                                     },
+                                    trailingIcon = {
+                                        IconButton(
+                                            onClick = {
+                                                categoryToEdit = category
+                                                editCategoryName = category.name
+                                            },
+                                            modifier = Modifier.size(20.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Edit,
+                                                contentDescription = "Edit Category",
+                                                tint = if (isSelected) Color.White.copy(alpha = 0.9f) else MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                        }
+                                    },
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = if (type == TransactionType.INCOME) Color(0xFF006D44) else ExpenseColor,
                                         selectedLabelColor = Color.White,
@@ -327,7 +470,7 @@ fun AddTransactionScreen(
                     }
                 }
 
-                // 4. Date & Time Selection (Supports Past Dates, Today, Yesterday)
+                // 5. Date & Time Selection (Supports Past Dates, Today, Yesterday)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -406,7 +549,7 @@ fun AddTransactionScreen(
                     }
                 }
 
-                // 5. Title & Note Fields
+                // 6. Title & Note Fields
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -436,6 +579,114 @@ fun AddTransactionScreen(
                     }
                 }
 
+                // 7. Receipt Photo Attachment Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "রসিদের ছবি (Receipt Attachment)",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        if (receiptUriString != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(160.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                            ) {
+                                AsyncImage(
+                                    model = receiptUriString,
+                                    contentDescription = "Receipt",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                                IconButton(
+                                    onClick = { receiptUriString = null },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(6.dp)
+                                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                                        .size(32.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = "Remove Photo",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = {
+                                    photoPickerLauncher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                    )
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(Icons.Filled.AddPhotoAlternate, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("ভাউচার বা রসিদের ছবি যোগ করুন")
+                            }
+                        }
+                    }
+                }
+
+                // 8. Recurring Toggle
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "রিকারিং ট্রানজেকশন (Recurring)",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "বাড়িভাড়া, বিল ইত্যাদি নিয়মিত খরচের জন্য",
+                                    fontSize = 11.5.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = isRecurring,
+                                onCheckedChange = { isRecurring = it }
+                            )
+                        }
+
+                        if (isRecurring) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                listOf("মাসিক (Monthly)", "সাপ্তাহিক (Weekly)", "বাৎসরিক (Yearly)").forEach { freq ->
+                                    FilterChip(
+                                        selected = recurringFrequency == freq,
+                                        onClick = { recurringFrequency = freq },
+                                        label = { Text(freq, fontSize = 11.sp) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if (error != null) {
                     Text(
                         text = error!!,
@@ -454,7 +705,11 @@ fun AddTransactionScreen(
                             amountStr = amount,
                             category = selectedCategory,
                             note = note,
-                            date = selectedDate
+                            date = selectedDate,
+                            wallet = selectedWallet,
+                            receiptImageUri = receiptUriString,
+                            isRecurring = isRecurring,
+                            recurringFrequency = if (isRecurring) recurringFrequency else ""
                         )
                     },
                     modifier = Modifier
@@ -487,6 +742,149 @@ fun AddTransactionScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+    }
+
+    // Dialog: Add New Category
+    if (showAddCategoryDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddCategoryDialog = false },
+            title = {
+                Text(
+                    text = "নতুন ক্যাটেগরি যোগ করুন (New Category)",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "ধরন: ${if (type == TransactionType.EXPENSE) "🔴 ব্যয় (Expense)" else "🟢 আয় (Income)"}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (type == TransactionType.EXPENSE) ExpenseColor else Color(0xFF006D44)
+                    )
+                    OutlinedTextField(
+                        value = newCategoryName,
+                        onValueChange = { newCategoryName = it },
+                        label = { Text("ক্যাটেগরির নাম *") },
+                        placeholder = { Text("উদা: মুদি বাজার, ওষুধ, বই...") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newCategoryName.isNotBlank()) {
+                            viewModel.addCategory(newCategoryName.trim(), type)
+                            showAddCategoryDialog = false
+                            newCategoryName = ""
+                        }
+                    },
+                    enabled = newCategoryName.isNotBlank(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (type == TransactionType.INCOME) Color(0xFF006D44) else ExpenseColor
+                    )
+                ) {
+                    Text("সংরক্ষণ করুন")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showAddCategoryDialog = false }) {
+                    Text("বাতিল")
+                }
+            }
+        )
+    }
+
+    // Dialog: Edit or Delete Selected Category
+    categoryToEdit?.let { targetCat ->
+        var showDeleteConfirm by remember { mutableStateOf(false) }
+
+        if (showDeleteConfirm) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                title = { Text("ক্যাটেগরি মুছে ফেলবেন?") },
+                text = { Text("\"${targetCat.name}\" ক্যাটেগরি কি সত্যি মুছে ফেলতে চান?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteCategory(targetCat.id)
+                            if (selectedCategory?.id == targetCat.id) {
+                                selectedCategory = null
+                            }
+                            showDeleteConfirm = false
+                            categoryToEdit = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = ExpenseColor)
+                    ) {
+                        Text("মুছে ফেলুন (Delete)")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { showDeleteConfirm = false }) {
+                        Text("বাতিল")
+                    }
+                }
+            )
+        } else {
+            AlertDialog(
+                onDismissRequest = { categoryToEdit = null },
+                title = {
+                    Text(
+                        text = "ক্যাটেগরি এডিট বা মুছুন",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedTextField(
+                            value = editCategoryName,
+                            onValueChange = { editCategoryName = it },
+                            label = { Text("ক্যাটেগরির নাম") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        TextButton(
+                            onClick = { showDeleteConfirm = true },
+                            colors = ButtonDefaults.textButtonColors(contentColor = ExpenseColor),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Icon(Icons.Filled.DeleteOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("এই ক্যাটেগরি মুছে ফেলুন", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (editCategoryName.isNotBlank()) {
+                                val updated = targetCat.copy(name = editCategoryName.trim())
+                                viewModel.updateCategory(updated)
+                                if (selectedCategory?.id == targetCat.id) {
+                                    selectedCategory = updated
+                                }
+                                categoryToEdit = null
+                            }
+                        },
+                        enabled = editCategoryName.isNotBlank()
+                    ) {
+                        Text("আপডেট করুন")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { categoryToEdit = null }) {
+                        Text("বাতিল")
+                    }
+                }
+            )
         }
     }
 }

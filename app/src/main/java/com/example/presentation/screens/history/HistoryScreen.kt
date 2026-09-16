@@ -28,27 +28,43 @@ import com.example.domain.model.TransactionType
 import com.example.presentation.components.TransactionItem
 import com.example.ui.theme.ExpenseColor
 import com.example.ui.theme.IncomeColor
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
     onNavigateToEdit: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     val transactions by viewModel.filteredTransactions.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filterType by viewModel.filterType.collectAsState()
+    val filterCategory by viewModel.filterCategory.collectAsState()
+    val availableCategories by viewModel.availableCategories.collectAsState()
     val dateFilter by viewModel.dateFilter.collectAsState()
     val customStart by viewModel.customStartDate.collectAsState()
     val customEnd by viewModel.customEndDate.collectAsState()
     val filterSummary by viewModel.filterSummary.collectAsState()
 
     val displayDateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
+    val todayStr = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
+    val yesterdayStr = remember {
+        val cal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.time)
+    }
+
+    // Group transactions by date
+    val groupedTransactions = remember(transactions) {
+        transactions.groupBy { it.date }
+    }
 
     // Date picker dialog helpers
     val showStartDatePicker = {
@@ -86,6 +102,7 @@ fun HistoryScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -223,6 +240,35 @@ fun HistoryScreen(
                 }
             }
 
+            // Category Filter Chips (horizontal scroll)
+            if (availableCategories.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    FilterChip(
+                        selected = filterCategory == null,
+                        onClick = { viewModel.setFilterCategory(null) },
+                        label = { Text("সব ক্যাটেগরি", fontSize = 11.sp) },
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    availableCategories.forEach { cat ->
+                        val isSelected = filterCategory == cat
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = {
+                                viewModel.setFilterCategory(if (isSelected) null else cat)
+                            },
+                            label = { Text(cat, fontSize = 11.sp) },
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                }
+            }
+
             // Transaction Type Filter (All, Income, Expense)
             Row(
                 modifier = Modifier
@@ -267,7 +313,7 @@ fun HistoryScreen(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -340,15 +386,67 @@ fun HistoryScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(transactions, key = { it.id }) { tx ->
-                        TransactionItem(
-                            transaction = tx,
-                            onEdit = { onNavigateToEdit(tx.id) },
-                            onDelete = { viewModel.deleteTransaction(tx.id) }
-                        )
+                    groupedTransactions.forEach { (dateStr, txList) ->
+                        stickyHeader(key = "header_$dateStr") {
+                            val headerLabel = when (dateStr) {
+                                todayStr -> "আজ (Today) • $dateStr"
+                                yesterdayStr -> "গতকাল (Yesterday) • $dateStr"
+                                else -> dateStr
+                            }
+                            val dayTotalIncome = txList.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
+                            val dayTotalExpense = txList.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
+
+                            Surface(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                                tonalElevation = 2.dp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = headerLabel,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "+৳${String.format("%,.0f", dayTotalIncome)} | -৳${String.format("%,.0f", dayTotalExpense)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        items(txList, key = { it.id }) { tx ->
+                            TransactionItem(
+                                transaction = tx,
+                                onEdit = { onNavigateToEdit(tx.id) },
+                                onDelete = {
+                                    viewModel.deleteTransaction(tx)
+                                    coroutineScope.launch {
+                                        val res = snackbarHostState.showSnackbar(
+                                            message = "\"${tx.title}\" মুছে ফেলা হয়েছে",
+                                            actionLabel = "আনডু (Undo)",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                        if (res == SnackbarResult.ActionPerformed) {
+                                            viewModel.undoDelete()
+                                        }
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }

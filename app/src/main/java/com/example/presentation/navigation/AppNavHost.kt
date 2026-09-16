@@ -1,13 +1,22 @@
 package com.example.presentation.navigation
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,11 +33,17 @@ import com.example.presentation.screens.auth.AuthViewModel
 import com.example.presentation.screens.auth.BiometricLockScreen
 import com.example.presentation.screens.auth.LoginScreen
 import com.example.presentation.screens.auth.SplashScreen
+import com.example.presentation.screens.budget.BudgetScreen
+import com.example.presentation.screens.category.CategoryManagementScreen
 import com.example.presentation.screens.daily.DailyScreen
 import com.example.presentation.screens.history.HistoryScreen
 import com.example.presentation.screens.home.HomeScreen
+import com.example.presentation.screens.khata.KhataScreen
+import com.example.presentation.screens.onboarding.OnboardingScreen
+import com.example.presentation.screens.recurring.RecurringScreen
 import com.example.presentation.screens.report.ReportScreen
 import com.example.presentation.screens.settings.SettingsScreen
+import com.example.presentation.screens.wallet.WalletScreen
 import com.example.presentation.viewmodel.AppViewModelProvider
 
 @Composable
@@ -62,20 +77,67 @@ fun AppNavHost(
     Scaffold(
         bottomBar = {
             if (BottomNavScreens.any { it.route == currentRoute }) {
-                NavigationBar {
-                    BottomNavScreens.forEach { screen ->
-                        NavigationBarItem(
-                            icon = { Icon(screen.icon!!, contentDescription = screen.title) },
-                            label = { Text(screen.title) },
-                            selected = currentRoute == screen.route,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
+                Surface(
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 6.dp,
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+                ) {
+                    NavigationBar(
+                        containerColor = Color.Transparent,
+                        tonalElevation = 0.dp,
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .height(68.dp)
+                    ) {
+                        BottomNavScreens.forEach { screen ->
+                            val selected = currentRoute == screen.route
+                            NavigationBarItem(
+                                icon = {
+                                    Box(
+                                        modifier = if (selected) {
+                                            Modifier
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f))
+                                                .padding(horizontal = 14.dp, vertical = 4.dp)
+                                        } else {
+                                            Modifier.padding(horizontal = 14.dp, vertical = 4.dp)
+                                        },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = screen.icon!!,
+                                            contentDescription = screen.title,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+                                },
+                                label = {
+                                    Text(
+                                        text = screen.title,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                        fontSize = if (selected) 11.5.sp else 11.sp
+                                    )
+                                },
+                                selected = selected,
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    indicatorColor = Color.Transparent,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                ),
+                                onClick = {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
@@ -84,12 +146,24 @@ fun AppNavHost(
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
             if (BottomNavScreens.any { it.route == currentRoute }) {
-                FloatingActionButton(
+                ExtendedFloatingActionButton(
                     onClick = { navController.navigate(Screen.Add.route) },
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = RoundedCornerShape(18.dp),
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 6.dp,
+                        pressedElevation = 2.dp
+                    ),
+                    modifier = Modifier.padding(bottom = 6.dp)
                 ) {
-                    Icon(Icons.Filled.Add, "Add Transaction")
+                    Icon(Icons.Filled.Add, "নতুন হিসাব", modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "নতুন হিসাব",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         },
@@ -158,7 +232,13 @@ fun AppNavHost(
                     onNavigateToHistory = { navController.navigate(Screen.History.route) },
                     onNavigateToEdit = { transactionId ->
                         navController.navigate(Screen.Edit.createRoute(transactionId))
-                    }
+                    },
+                    onNavigateToKhata = { navController.navigate(Screen.Khata.route) },
+                    onNavigateToWallets = { navController.navigate(Screen.Wallets.route) },
+                    onNavigateToBudgets = { navController.navigate(Screen.Budgets.route) },
+                    onNavigateToRecurring = { navController.navigate(Screen.Recurring.route) },
+                    onNavigateToOnboarding = { navController.navigate(Screen.Onboarding.route) },
+                    onNavigateToCategoryManagement = { navController.navigate(Screen.CategoryManagement.route) }
                 )
             }
             composable(Screen.Daily.route) {
@@ -200,6 +280,35 @@ fun AppNavHost(
                     }
                 )
             }
+            composable(Screen.Khata.route) {
+                KhataScreen(
+                    viewModel = viewModel(factory = viewModelFactory),
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Wallets.route) {
+                WalletScreen(
+                    viewModel = viewModel(factory = viewModelFactory),
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Budgets.route) {
+                BudgetScreen(
+                    viewModel = viewModel(factory = viewModelFactory),
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Recurring.route) {
+                RecurringScreen(
+                    viewModel = viewModel(factory = viewModelFactory),
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    onFinished = { navController.popBackStack() }
+                )
+            }
             composable(Screen.Profile.route) {
                 SettingsScreen(
                     viewModel = viewModel(factory = viewModelFactory),
@@ -207,6 +316,9 @@ fun AppNavHost(
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
+                    },
+                    onNavigateToCategoryManagement = {
+                        navController.navigate(Screen.CategoryManagement.route)
                     }
                 )
             }
@@ -217,7 +329,16 @@ fun AppNavHost(
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
+                    },
+                    onNavigateToCategoryManagement = {
+                        navController.navigate(Screen.CategoryManagement.route)
                     }
+                )
+            }
+            composable(Screen.CategoryManagement.route) {
+                CategoryManagementScreen(
+                    viewModel = viewModel(factory = viewModelFactory),
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable(Screen.AiAssistant.route) {

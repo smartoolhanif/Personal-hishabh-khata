@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.domain.model.Category
 import com.example.domain.model.Transaction
 import com.example.domain.model.TransactionType
+import com.example.domain.model.Wallet
 import com.example.domain.repository.TransactionRepository
+import com.example.domain.repository.WalletRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,13 +19,17 @@ import java.util.Date
 import java.util.Locale
 
 class AddTransactionViewModel(
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val walletRepository: WalletRepository? = null
 ) : ViewModel() {
 
     private val _type = MutableStateFlow(TransactionType.EXPENSE)
     val type = _type.asStateFlow()
     
     val categories: StateFlow<List<Category>> = transactionRepository.getCategories()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val wallets: StateFlow<List<Wallet>> = (walletRepository?.getWallets() ?: kotlinx.coroutines.flow.emptyFlow())
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val _isSaving = MutableStateFlow(false)
@@ -76,7 +82,11 @@ class AddTransactionViewModel(
         amountStr: String,
         category: Category?,
         note: String,
-        date: Date
+        date: Date,
+        wallet: Wallet? = null,
+        receiptImageUri: String? = null,
+        isRecurring: Boolean = false,
+        recurringFrequency: String = ""
     ) {
         val amount = amountStr.toDoubleOrNull()
         if (title.isBlank()) {
@@ -100,6 +110,11 @@ class AddTransactionViewModel(
             type = _type.value,
             categoryId = category.id,
             categoryName = category.name,
+            walletId = wallet?.id ?: "",
+            walletName = wallet?.name ?: "",
+            receiptImageUri = receiptImageUri,
+            isRecurring = isRecurring,
+            recurringFrequency = recurringFrequency,
             note = note,
             timestamp = date.time,
             date = dateStr,
@@ -114,7 +129,12 @@ class AddTransactionViewModel(
             val result = if (editingTransactionId != null) {
                 transactionRepository.updateTransaction(transaction)
             } else {
-                transactionRepository.addTransaction(transaction)
+                val addRes = transactionRepository.addTransaction(transaction)
+                if (addRes.isSuccess && wallet != null && walletRepository != null) {
+                    val balanceDelta = if (_type.value == TransactionType.INCOME) amount else -amount
+                    walletRepository.updateBalance(wallet.id, balanceDelta)
+                }
+                addRes
             }
             
             if (result.isSuccess) {
@@ -128,5 +148,25 @@ class AddTransactionViewModel(
     
     fun resetSuccess() {
         _saveSuccess.value = false
+    }
+
+    fun addCategory(name: String, type: TransactionType) {
+        viewModelScope.launch {
+            transactionRepository.addCategory(
+                Category(name = name.trim(), type = type, iconName = "category")
+            )
+        }
+    }
+
+    fun updateCategory(category: Category) {
+        viewModelScope.launch {
+            transactionRepository.updateCategory(category)
+        }
+    }
+
+    fun deleteCategory(categoryId: String) {
+        viewModelScope.launch {
+            transactionRepository.deleteCategory(categoryId)
+        }
     }
 }

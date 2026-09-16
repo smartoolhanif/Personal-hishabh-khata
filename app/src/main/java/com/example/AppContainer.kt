@@ -3,10 +3,18 @@ package com.example
 import android.content.Context
 import com.example.data.ai.GeminiService
 import com.example.data.firebase.FirebaseAuthRepository
+import com.example.data.firebase.FirebaseBudgetRepository
+import com.example.data.firebase.FirebaseKhataRepository
+import com.example.data.firebase.FirebaseRecurringRepository
 import com.example.data.firebase.FirebaseTransactionRepository
+import com.example.data.firebase.FirebaseWalletRepository
 import com.example.data.preference.BiometricPreferenceManager
 import com.example.domain.repository.AuthRepository
+import com.example.domain.repository.BudgetRepository
+import com.example.domain.repository.KhataRepository
+import com.example.domain.repository.RecurringRepository
 import com.example.domain.repository.TransactionRepository
+import com.example.domain.repository.WalletRepository
 import com.example.util.biometric.BiometricHelper
 import com.example.util.biometric.SessionLockManager
 
@@ -19,6 +27,22 @@ class AppContainer(private val context: Context) {
         FirebaseTransactionRepository()
     }
     
+    val khataRepository: KhataRepository by lazy {
+        FirebaseKhataRepository()
+    }
+
+    val walletRepository: WalletRepository by lazy {
+        FirebaseWalletRepository()
+    }
+
+    val budgetRepository: BudgetRepository by lazy {
+        FirebaseBudgetRepository()
+    }
+
+    val recurringRepository: RecurringRepository by lazy {
+        FirebaseRecurringRepository()
+    }
+
     val geminiService: GeminiService by lazy {
         GeminiService()
     }

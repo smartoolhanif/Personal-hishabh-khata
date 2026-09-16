@@ -4,12 +4,15 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,10 +24,16 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,8 +55,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.presentation.components.TransactionItem
-import com.example.ui.theme.ExpenseColor
-import com.example.ui.theme.IncomeColor
+import com.example.ui.theme.AccentGold
+import com.example.ui.theme.AppRadius
+import com.example.ui.theme.HeroExpenseAccent
+import com.example.ui.theme.HeroExpenseBadgeBg
+import com.example.ui.theme.HeroGradientEnd
+import com.example.ui.theme.HeroGradientStart
+import com.example.ui.theme.HeroIncomeAccent
+import com.example.ui.theme.HeroIncomeBadgeBg
+import com.example.ui.theme.HeroNegativeBalance
+import com.example.ui.theme.HeroPositiveBalance
+import com.example.ui.theme.expenseColor
+import com.example.ui.theme.incomeColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,7 +74,13 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onNavigateToAi: () -> Unit,
     onNavigateToHistory: () -> Unit = {},
-    onNavigateToEdit: (String) -> Unit = {}
+    onNavigateToEdit: (String) -> Unit = {},
+    onNavigateToKhata: () -> Unit = {},
+    onNavigateToWallets: () -> Unit = {},
+    onNavigateToBudgets: () -> Unit = {},
+    onNavigateToRecurring: () -> Unit = {},
+    onNavigateToOnboarding: () -> Unit = {},
+    onNavigateToCategoryManagement: () -> Unit = {}
 ) {
     val user by viewModel.currentUser.collectAsState()
     val liveDate by viewModel.liveDate.collectAsState()
@@ -98,7 +123,7 @@ fun HomeScreen(
                                 .border(
                                     width = 2.dp,
                                     brush = Brush.linearGradient(
-                                        colors = listOf(Color(0xFF006D44), Color(0xFFD4AF37))
+                                        colors = listOf(MaterialTheme.colorScheme.primary, AccentGold)
                                     ),
                                     shape = CircleShape
                                 )
@@ -123,7 +148,7 @@ fun HomeScreen(
                                     text = initial,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
-                                    color = Color(0xFF006D44)
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -263,10 +288,18 @@ fun HomeScreen(
                                 )
                             },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color(0xFF006D44),
-                                selectedLabelColor = Color.White
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
-                            shape = RoundedCornerShape(12.dp),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = isSelected,
+                                borderColor = MaterialTheme.colorScheme.outlineVariant,
+                                selectedBorderColor = MaterialTheme.colorScheme.primary
+                            ),
+                            shape = AppRadius.Chip,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -285,11 +318,11 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .shadow(
-                                elevation = 6.dp,
-                                shape = RoundedCornerShape(24.dp),
-                                spotColor = Color(0xFF006D44).copy(alpha = 0.3f)
+                                elevation = 8.dp,
+                                shape = AppRadius.Hero,
+                                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
                             ),
-                        shape = RoundedCornerShape(24.dp),
+                        shape = AppRadius.Hero,
                         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
                     ) {
                         Box(
@@ -297,10 +330,7 @@ fun HomeScreen(
                                 .fillMaxWidth()
                                 .background(
                                     brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color(0xFF0D422A),
-                                            Color(0xFF072B1C)
-                                        )
+                                        colors = listOf(HeroGradientStart, HeroGradientEnd)
                                     )
                                 )
                                 .padding(20.dp)
@@ -316,7 +346,7 @@ fun HomeScreen(
                                         Text(
                                             text = summary.subTitle,
                                             style = MaterialTheme.typography.labelMedium,
-                                            color = Color(0xFFD4AF37),
+                                            color = AccentGold,
                                             fontWeight = FontWeight.SemiBold
                                         )
                                         Text(
@@ -352,7 +382,7 @@ fun HomeScreen(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = (-0.5).sp
                                     ),
-                                    color = if (summary.balance >= 0) Color(0xFF80E8B0) else Color(0xFFFF9E9E)
+                                    color = if (summary.balance >= 0) HeroPositiveBalance else HeroNegativeBalance
                                 )
 
                                 Spacer(modifier = Modifier.height(20.dp))
@@ -376,13 +406,13 @@ fun HomeScreen(
                                                 modifier = Modifier
                                                     .size(36.dp)
                                                     .clip(CircleShape)
-                                                    .background(Color(0xFF2E7D32).copy(alpha = 0.3f)),
+                                                    .background(HeroIncomeBadgeBg.copy(alpha = 0.3f)),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Filled.ArrowDownward,
                                                     contentDescription = "Income",
-                                                    tint = Color(0xFF69F0AE),
+                                                    tint = HeroIncomeAccent,
                                                     modifier = Modifier.size(20.dp)
                                                 )
                                             }
@@ -398,7 +428,7 @@ fun HomeScreen(
                                                     text = "৳ ${String.format("%,.2f", summary.income)}",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFF69F0AE)
+                                                    color = HeroIncomeAccent
                                                 )
                                             }
                                         }
@@ -418,13 +448,13 @@ fun HomeScreen(
                                                 modifier = Modifier
                                                     .size(36.dp)
                                                     .clip(CircleShape)
-                                                    .background(Color(0xFFC62828).copy(alpha = 0.3f)),
+                                                    .background(HeroExpenseBadgeBg.copy(alpha = 0.3f)),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Filled.ArrowUpward,
                                                     contentDescription = "Expense",
-                                                    tint = Color(0xFFFF8A80),
+                                                    tint = HeroExpenseAccent,
                                                     modifier = Modifier.size(20.dp)
                                                 )
                                             }
@@ -440,13 +470,94 @@ fun HomeScreen(
                                                     text = "৳ ${String.format("%,.2f", summary.expense)}",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFFFF8A80)
+                                                    color = HeroExpenseAccent
                                                 )
                                             }
                                         }
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // Quick Feature Hub (বাকি/ধার খাতা, ওয়ালেট, বাজেট, রিকারিং বিল)
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "জরুরি হিসাব-সেবা (Smart Tools)",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            IconButton(onClick = onNavigateToOnboarding, modifier = Modifier.size(28.dp)) {
+                                Icon(
+                                    Icons.Filled.HelpOutline,
+                                    contentDescription = "User Guide",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            FeatureActionItem(
+                                title = "বাকি খাতা",
+                                subtitle = "পাবে/দেবে",
+                                icon = Icons.Filled.MenuBook,
+                                color = Color(0xFFE65100),
+                                onClick = onNavigateToKhata
+                            )
+                            FeatureActionItem(
+                                title = "ওয়ালেট",
+                                subtitle = "নগদ/ব্যাংক",
+                                icon = Icons.Filled.AccountBalance,
+                                color = Color(0xFF0D47A1),
+                                onClick = onNavigateToWallets
+                            )
+                            FeatureActionItem(
+                                title = "বাজেট",
+                                subtitle = "মাসিক গোল",
+                                icon = Icons.Filled.TrackChanges,
+                                color = Color(0xFF2E7D32),
+                                onClick = onNavigateToBudgets
+                            )
+                            FeatureActionItem(
+                                title = "রিকারিং",
+                                subtitle = "বিল/ভাড়া",
+                                icon = Icons.Filled.Update,
+                                color = Color(0xFF6A1B9A),
+                                onClick = onNavigateToRecurring
+                            )
+                            FeatureActionItem(
+                                title = "ক্যাটেগরি",
+                                subtitle = "যোগ/এডিট",
+                                icon = Icons.Filled.Category,
+                                color = Color(0xFF00897B),
+                                onClick = onNavigateToCategoryManagement
+                            )
                         }
                     }
                 }
@@ -707,7 +818,7 @@ fun QuickSummaryTile(
                 text = "$balancePrefix${String.format("%,.0f", Math.abs(balance))}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = if (balance >= 0) IncomeColor else ExpenseColor
+                color = if (balance >= 0) incomeColor() else expenseColor()
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -719,14 +830,72 @@ fun QuickSummaryTile(
                 Text(
                     text = "আয়: ৳${String.format("%,.0f", income)}",
                     fontSize = 10.sp,
-                    color = IncomeColor
+                    color = incomeColor()
                 )
                 Text(
                     text = "ব্যয়: ৳${String.format("%,.0f", expense)}",
                     fontSize = 10.sp,
-                    color = ExpenseColor
+                    color = expenseColor()
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun FeatureActionItem(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = color.copy(alpha = 0.08f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.18f)),
+        modifier = Modifier.width(84.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(color.copy(alpha = 0.85f), color)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 9.5.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
         }
     }
 }

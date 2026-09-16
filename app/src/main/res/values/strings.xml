@@ -28,4 +28,5 @@
     <string name="dialog_disable_biometric_desc">Are you sure you want to disable fingerprint or face unlock for this account?</string>
     <string name="btn_disable">Disable</string>
     <string name="btn_cancel">Cancel</string>
+    <string name="widget_description">হিসাব-খাতা ব্যালেন্স উইজেট (Balance at a glance)</string>
 </resources>

@@ -13,17 +13,23 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     object Splash : Screen("splash", "Splash")
     object Login : Screen("login", "Login")
     object BiometricLock : Screen("biometric_lock", "Unlock")
-    object Home : Screen("home", "Home", Icons.Filled.Home)
-    object Daily : Screen("daily", "Daily", Icons.Filled.CalendarToday)
-    object Add : Screen("add", "Add Transaction")
+    object Home : Screen("home", "হোম", Icons.Filled.Home)
+    object Daily : Screen("daily", "দৈনিক", Icons.Filled.CalendarToday)
+    object Add : Screen("add", "নতুন লেনদেন")
     object Edit : Screen("edit/{transactionId}", "Edit Transaction") {
         fun createRoute(transactionId: String) = "edit/$transactionId"
     }
-    object Reports : Screen("reports", "Reports", Icons.Filled.BarChart)
-    object History : Screen("history", "History", Icons.Filled.History)
-    object Profile : Screen("profile", "Profile", Icons.Filled.Person)
+    object Reports : Screen("reports", "রিপোর্ট", Icons.Filled.BarChart)
+    object History : Screen("history", "ইতিহাস", Icons.Filled.History)
+    object Profile : Screen("profile", "প্রোফাইল", Icons.Filled.Person)
     object Settings : Screen("settings", "Settings", Icons.Filled.Settings)
     object AiAssistant : Screen("ai_assistant", "AI Assistant")
+    object Khata : Screen("khata", "বাকি/ধার খাতা")
+    object Wallets : Screen("wallets", "ওয়ালেট/অ্যাকাউন্ট")
+    object Budgets : Screen("budgets", "বাজেট গোল")
+    object Recurring : Screen("recurring", "রিকারিং বিল")
+    object Onboarding : Screen("onboarding", "অনবোর্ডিং")
+    object CategoryManagement : Screen("category_management", "ক্যাটেগরি ব্যবস্থাপনা")
 }
 
 val BottomNavScreens = listOf(

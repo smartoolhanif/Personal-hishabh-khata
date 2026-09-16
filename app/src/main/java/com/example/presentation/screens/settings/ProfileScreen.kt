@@ -3,12 +3,15 @@ package com.example.presentation.screens.settings
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Edit
@@ -41,7 +44,8 @@ import com.example.util.biometric.BiometricStatus
 @Composable
 fun ProfileScreen(
     viewModel: SettingsViewModel,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onNavigateToCategoryManagement: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val activity = context as? FragmentActivity
@@ -457,6 +461,35 @@ fun ProfileScreen(
                             Text("ডাটা ক্লাউড সিঙ্ক (Data Sync)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                             Text("Firebase ক্লাউডে সংরক্ষিত ও সুরক্ষিত", style = MaterialTheme.typography.bodySmall, color = Color(0xFF00897B))
                         }
+                    }
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                    // Category Management
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigateToCategoryManagement() }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Category,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("ক্যাটেগরি ব্যবস্থাপনা (Categories)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                            Text("আয় ও ব্যয়ের ক্যাটেগরি যোগ ও এডিট করুন", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Manage",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))

@@ -27,6 +27,10 @@ class MainActivity : FragmentActivity() {
         val viewModelFactory = AppViewModelProvider(
             authRepository = app.container.authRepository,
             transactionRepository = app.container.transactionRepository,
+            khataRepository = app.container.khataRepository,
+            walletRepository = app.container.walletRepository,
+            budgetRepository = app.container.budgetRepository,
+            recurringRepository = app.container.recurringRepository,
             geminiService = app.container.geminiService,
             biometricHelper = app.container.biometricHelper,
             biometricPreferenceManager = app.container.biometricPreferenceManager,

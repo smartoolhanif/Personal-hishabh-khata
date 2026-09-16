@@ -39,6 +39,7 @@ data class FilterSummary(
 data class HistoryFilter(
     val query: String = "",
     val type: TransactionType? = null,
+    val category: String? = null,
     val dateOption: DateFilterOption = DateFilterOption.ALL,
     val customStart: Date? = null,
     val customEnd: Date? = null
@@ -51,10 +52,16 @@ class HistoryViewModel(
     private val _filter = MutableStateFlow(HistoryFilter())
     val filter: StateFlow<HistoryFilter> = _filter.asStateFlow()
 
+    private val _recentlyDeletedTx = MutableStateFlow<Transaction?>(null)
+    val recentlyDeletedTx: StateFlow<Transaction?> = _recentlyDeletedTx.asStateFlow()
+
     val searchQuery: StateFlow<String> = _filter.map { it.query }
         .stateIn(viewModelScope, SharingStarted.Lazily, "")
 
     val filterType: StateFlow<TransactionType?> = _filter.map { it.type }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    val filterCategory: StateFlow<String?> = _filter.map { it.category }
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     val dateFilter: StateFlow<DateFilterOption> = _filter.map { it.dateOption }
@@ -68,6 +75,10 @@ class HistoryViewModel(
 
     val allTransactions: StateFlow<List<Transaction>> = transactionRepository.getTransactions()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val availableCategories: StateFlow<List<String>> = allTransactions.map { list ->
+        list.map { it.categoryName }.filter { it.isNotBlank() }.distinct().sorted()
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val filteredTransactions: StateFlow<List<Transaction>> = combine(
         allTransactions,
@@ -109,7 +120,12 @@ class HistoryViewModel(
             // 2. Type Filter
             val matchesType = if (currentFilter.type == null) true else tx.type == currentFilter.type
 
-            // 3. Date Filter
+            // 3. Category Filter
+            val matchesCategory = if (currentFilter.category.isNullOrBlank()) true else {
+                tx.categoryName.equals(currentFilter.category, ignoreCase = true)
+            }
+
+            // 4. Date Filter
             val matchesDate = when (currentFilter.dateOption) {
                 DateFilterOption.ALL -> true
                 DateFilterOption.TODAY -> tx.date == todayStr
@@ -136,7 +152,7 @@ class HistoryViewModel(
                 }
             }
 
-            matchesQuery && matchesType && matchesDate
+            matchesQuery && matchesType && matchesCategory && matchesDate
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -159,6 +175,10 @@ class HistoryViewModel(
         _filter.value = _filter.value.copy(type = type)
     }
 
+    fun setFilterCategory(category: String?) {
+        _filter.value = _filter.value.copy(category = category)
+    }
+
     fun setDateFilter(option: DateFilterOption) {
         _filter.value = _filter.value.copy(dateOption = option)
     }
@@ -175,9 +195,18 @@ class HistoryViewModel(
         _filter.value = HistoryFilter()
     }
 
-    fun deleteTransaction(id: String) {
+    fun deleteTransaction(tx: Transaction) {
+        _recentlyDeletedTx.value = tx
         viewModelScope.launch {
-            transactionRepository.deleteTransaction(id)
+            transactionRepository.deleteTransaction(tx.id)
+        }
+    }
+
+    fun undoDelete() {
+        val txToRestore = _recentlyDeletedTx.value ?: return
+        viewModelScope.launch {
+            transactionRepository.restoreTransaction(txToRestore)
+            _recentlyDeletedTx.value = null
         }
     }
 }

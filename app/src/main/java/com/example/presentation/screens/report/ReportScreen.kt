@@ -1,5 +1,6 @@
 package com.example.presentation.screens.report
 
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,12 +30,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.ExpenseColor
 import com.example.ui.theme.IncomeColor
+import com.example.util.ReportExportHelper
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -40,12 +46,14 @@ import java.util.Locale
 fun ReportScreen(
     viewModel: ReportViewModel
 ) {
+    val context = LocalContext.current
     val currentMonth by viewModel.currentMonth.collectAsState()
     val totalExpense by viewModel.totalExpense.collectAsState()
     val totalIncome by viewModel.totalIncome.collectAsState()
     val balance by viewModel.balance.collectAsState()
     val categoryBreakdown by viewModel.categoryBreakdown.collectAsState()
     val monthlyTrends by viewModel.monthlyTrends.collectAsState()
+    val transactions by viewModel.transactions.collectAsState()
 
     val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
     val displayMonth = monthYearFormat.format(currentMonth)
@@ -58,6 +66,48 @@ fun ReportScreen(
                         text = "আর্থিক প্রতিবেদন (Reports)",
                         fontWeight = FontWeight.Bold
                     )
+                },
+                actions = {
+                    IconButton(onClick = {
+                        if (transactions.isEmpty()) {
+                            Toast.makeText(context, "এক্সপোর্ট করার মতো লেনদেন নেই", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val pdfFile = ReportExportHelper.exportToPdf(
+                                context = context,
+                                periodTitle = displayMonth,
+                                transactions = transactions,
+                                totalIncome = totalIncome,
+                                totalExpense = totalExpense,
+                                netBalance = balance
+                            )
+                            if (pdfFile != null) {
+                                ReportExportHelper.shareFile(context, pdfFile, "application/pdf", "হিসাব-খাতা PDF রিপোর্ট ($displayMonth)")
+                            } else {
+                                Toast.makeText(context, "PDF তৈরিতে সমস্যা হয়েছে", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Filled.PictureAsPdf, contentDescription = "Export PDF", tint = MaterialTheme.colorScheme.primary)
+                    }
+
+                    IconButton(onClick = {
+                        if (transactions.isEmpty()) {
+                            Toast.makeText(context, "এক্সপোর্ট করার মতো লেনদেন নেই", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val csvFile = ReportExportHelper.exportToCsv(
+                                context = context,
+                                periodName = displayMonth,
+                                transactions = transactions
+                            )
+                            if (csvFile != null) {
+                                ReportExportHelper.shareFile(context, csvFile, "text/csv", "হিসাব-খাতা Excel রিপোর্ট ($displayMonth)")
+                            } else {
+                                Toast.makeText(context, "Excel ফাইলে সমস্যা হয়েছে", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Filled.TableChart, contentDescription = "Export Excel/CSV", tint = MaterialTheme.colorScheme.secondary)
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
